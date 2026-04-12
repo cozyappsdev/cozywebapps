@@ -26,7 +26,6 @@ pefile==2024.8.26
 pillow==12.1.1
 pipreqs==0.4.13
 protobuf==6.33.5
-psycopg2==2.9.11
 psycopg2-binary==2.9.11
 pyarrow==23.0.1
 pydeck==0.9.1
