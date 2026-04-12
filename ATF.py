@@ -2,7 +2,7 @@ import streamlit as st
 from streamlit import connections
 import psycopg2
 import psycopg2.extras
-from sqlalchemy import create_engine
+import sqlalchemy
 import pandas as pd
 import os
 from datetime import datetime, date
