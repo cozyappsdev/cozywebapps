@@ -29,7 +29,6 @@ def show_message(msg):
 
         st.rerun() # Closesthe dialog
 
-
 cnnOne = None
 cursor = None
 
