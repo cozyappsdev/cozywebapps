@@ -1,11 +1,13 @@
 import streamlit as st
-
-import sqlite3
+from streamlit import connections
+import psycopg2
+import psycopg2.extras
+from sqlalchemy import create_engine
 import pandas as pd
 import os
-
 from datetime import datetime, date
 import time
+import toml
 
 #current_date = date.today()
 
@@ -14,7 +16,6 @@ current_date = datetime.now()
 # Format date as string
 
 formatted_curdate = current_date.strftime("%d/%m/%Y  %H:%M:%S")
-
 
 # Define the dialog Function
 
@@ -29,50 +30,63 @@ def show_message(msg):
         st.rerun() # Closesthe dialog
 
 
-def init_db():
+cnnOne = None
+cursor = None
 
-    cnnOne = sqlite3.connect("ATFDb.db")
+try:
+    # Load the secrets from the secrets.toml file
+    secrets_path = os.path.abspath('.streamlit/secrets.toml')
+    st.secrets = toml.load(secrets_path)       
 
-    cursor = cnnOne.cursor()    
+    cnnOne = psycopg2.connect(
+        host = st.secrets["database"]["db_host"],
+        dbname = st.secrets["database"]["db_name"],
+        user = st.secrets["database"]["db_user"],
+        password = st.secrets["database"]["db_pswd"],
+        port = st.secrets["database"]["db_port"]
+        )
 
-    cursor.execute("""
+    cursor = cnnOne.cursor()
 
-    CREATE TABLE IF NOT EXISTS AccommoRecs (
+    # Create table
+    create_table_query = """
 
-    RecID INTEGER PRIMARY KEY AUTOINCREMENT,
+        CREATE TABLE IF NOT EXISTS AccommoRecs (
 
-    RecDte TEXT(25) NOT NULL,       
+            RecID SERIAL PRIMARY KEY,
 
-    Country TEXT(25) NOT NULL,
+            RecDte varchar(25),       
 
-    City TEXT(25) NOT NULL,        
+            Country varchar(25) NOT NULL,
 
-    Suburb TEXT(25) NOT NULL,
+            City varchar(25) NOT NULL,        
 
-    NoOfRooms TEXT(5) NOT NULL,
+            Suburb varchar(25) NOT NULL,
 
-    Rent TEXT(10) NULL,        
+            NoOfRooms varchar(5) NOT NULL,
 
-    EntryNo TEXT(25) NOT NULL,        
+            Rent varchar(10) NULL,        
 
-    ContactNo TEXT(20) NOT NULL,
+            EntryNo varchar(25) NOT NULL,        
 
-    RS TEXT(5) NOT NULL
+            ContactNo varchar(20) NOT NULL,
 
-    )"""
+            RS varchar(5) NOT NULL
 
-    )
-   
-
-    # Commit the changes
+            );
+            """
+    cursor.execute(create_table_query)
 
     cnnOne.commit()
-
-
-# Initialize database
-
-init_db()
-
+    # st.write("Table 'AccommoRecs' created successfully")
+    
+except Exception as error:
+    print(error)
+finally:
+    if cursor is not None:
+     cursor.close()
+    if cnnOne is not None:
+     cnnOne.close()
 
 # App main title
 
@@ -187,9 +201,9 @@ def EnterAvailableAccommodation_page():
 
     # Function to insert data into the table
 
-    def InsertAccommoToRentOut(): #RecDte,Country,City,Suburb,NoOfRooms,Rent,EntryNo,ContactNo,RS):    
+    def InsertAccommoToRentOut():    
 
-        #pvProcessFeedback = ""
+        NumberOfAccs = 0
 
         # Convert all text in python variables to uppercase
 
@@ -209,91 +223,159 @@ def EnterAvailableAccommodation_page():
 
         upcContactNo = dtaContactNo
 
-        dtaRS = 'Lld'    
-    
+        dtaRS = 'Lld' 
+
+        cnnOne = None
+
+        cursor = None
 
         # CHECK PRESENCE OF RECORD BY COUNTING RECORD'S ID
 
-        try:               
+        try:
+            #cnnOne = st.connection("postgresql", type="sql")
+            # Load the secrets from the secrets.toml file
+            secrets_path = os.path.abspath('.streamlit/secrets.toml')
+            st.secrets = toml.load(secrets_path)      
+            
+            cnnOne = psycopg2.connect(
+                host = st.secrets["database"]["db_host"],
+                dbname = st.secrets["database"]["db_name"],
+                user = st.secrets["database"]["db_user"],
+                password = st.secrets["database"]["db_pswd"],
+                port = st.secrets["database"]["db_port"]
+                )
 
-            cnnOne= sqlite3.connect('ATFDb.db')       
+            cursor = cnnOne.cursor()       
 
-            cur = cnnOne.cursor()       
+            RowsQuery="SELECT COUNT(*) FROM AccommoRecs WHERE EntryNo = %s"       
 
-            RowsQuery="SELECT COUNT(*) FROM AccommoRecs WHERE EntryNo=?"       
-
-            cur.execute(RowsQuery, (upcEntryNo,))           
+            cursor.execute(RowsQuery, (upcEntryNo,))           
 
             # Collect result of count
 
-            NumberOfAccs=cur.fetchone()[0]
+            NumberOfAccs=cursor.fetchone()[0]
 
-        except sqlite3.Error as e:
-
-            st.warning(f"An error occurred: {e}")
+        except Exception as e:
+            with st.sidebar:
+                placeholder = st.empty()
+                with placeholder:            
+                    placeholder.warning(f"An error occurred: {e}")
+                    time.sleep(6)
+                    placeholder = st.empty()
 
         finally:
 
-            if cnnOne:
+            if cursor is not None:
+
+                cursor.close()
+
+            if cnnOne is not None:
 
                 cnnOne.close()
                 
 
         if NumberOfAccs > 0:
-
-            st.warning(f"{upcEntryNo} is not available. Please create a different entry number and try again.")
+            with st.sidebar:
+                placeholder = st.empty()
+                with placeholder:
+                    placeholder.warning(f"{upcEntryNo} is not available. Please create a different entry number and try again.")
+                    time.sleep(3)
+                    placeholder =st.empty()
 
         else:
 
+            #if upcRecDte and upcCountry and upcCity and upcSuburb and upcNoOfRooms and upcRent and upcEntryNo and upcContactNo:
 
-            if upcRecDte and upcCountry and upcCity and upcSuburb and upcNoOfRooms and upcRent and upcEntryNo and upcContactNo:
-            
+            cnnOne = None
 
-                try:
+            cursor = None            
+
+            try:
+                # Load the secrets from the secrets.toml file
+                secrets_path = os.path.abspath('.streamlit/secrets.toml')
+                st.secrets = toml.load(secrets_path)       # st.read_secrets(secrets_path)  #  
+               
+                # Load the secrets from the secrets.toml file
+                secrets_path = os.path.abspath('.streamlit/secrets.toml')
+                st.secrets = toml.load(secrets_path)       
+
+                cnnOne = psycopg2.connect(
+                    host = st.secrets["database"]["db_host"],
+                    dbname = st.secrets["database"]["db_name"],
+                    user = st.secrets["database"]["db_user"],
+                    password = st.secrets["database"]["db_pswd"],
+                    port = st.secrets["database"]["db_port"]
+                    )
+
+                cursor = cnnOne.cursor()
+                
+                InsertDetailsQuery = "INSERT INTO AccommoRecs (RecDte,Country,City,Suburb,NoOfRooms,Rent,EntryNo,ContactNo,RS) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"                    
+
+                cursor.execute(InsertDetailsQuery, (upcRecDte,upcCountry,upcCity,upcSuburb,upcNoOfRooms,upcRent,upcEntryNo,upcContactNo,dtaRS))
+
+                # Confirm success 
+                                    
+                ######st.toast(f"Entry number {upcEntryNo} inserted successfully.")                   
+
+                # persist the changes to database by calling cnnOne.commit() 
+
+                cnnOne.commit()
+                
+            except Exception as ex:
+
+                sqlstate = ex.args[0]
+                with st.sidebar:
+                    placeholder = st.empty()
+                    with placeholder:
+                        placeholder.warning(f"Error inserting new record: {sqlstate}.")
+                        time.sleep(6)
+                        placeholder =st.empty()
+
+            finally:
+
+                # Close the connection
+
+                if cursor is not None:
+
+                    cursor.close()
+
+                if cnnOne is not None:
+
+                    cnnOne.close()
                     
+            #else:
 
-                    cnnOne =sqlite3.connect('ATFDb.db')
+                #st.warning("Please enter data in every data field.")
 
-                    cursor = cnnOne.cursor() 
+    #st.button("Submit", on_click =  InsertAccommoToRentOut)
+    if st.sidebar.button('SUBMIT ENTRY'):
+        # Convert all text in python variables to uppercase
+        upcRecDte = dtaRecDte.upper()
+        upcCountry = dtaCountry.upper()
+        upcCity = dtaCity.upper()
+        upcSuburb = dtaSuburb.upper()
+        upcNoOfRooms = dtaNoOfRooms.upper()
+        upcRent = dtaRent.upper()
+        upcEntryNo = dtaEntryNo.upper()
+        upcContactNo = dtaContactNo
+        if upcRecDte and upcCountry and upcCity and upcSuburb and upcNoOfRooms and upcRent and upcEntryNo and upcContactNo:
+            InsertAccommoToRentOut()
+           
+            with st.sidebar:
 
-
-                    InsertDetailsQuery = "INSERT INTO AccommoRecs (RecDte,Country,City,Suburb,NoOfRooms,Rent,EntryNo,ContactNo,RS) VALUES (?,?,?,?,?,?,?,?,?)"
+                placeholder = st.empty()            
+                with placeholder:                   
+                    placeholder.success("Record inserted successfully!")
+                    time.sleep(3)
+                    placeholder = st.empty()
                     
-
-                    cursor.execute(InsertDetailsQuery, (upcRecDte,upcCountry,upcCity,upcSuburb,upcNoOfRooms,upcRent,upcEntryNo,upcContactNo,dtaRS))
-
-                    # Confirm success 
-                                      
-                    st.toast(f"Entry number {upcEntryNo} inserted successfully.")                   
-
-                    # persist the changes to database by calling cnnOne.commit() 
-
-                    cnnOne.commit()
-
-                    # close the connection
-
-                    cnnOne.close()                                         
-
-
-                except sqlite3.Error as ex:
-
-                    sqlstate = ex.args[0]
-
-                    st.warning(f"Error inserting new record: {sqlstate}.")
-
-                finally:
-
-                    # Close the connection
-
-                    if cnnOne:
-
-                        cnnOne.close()
-
-            else:
-
-                st.warning("Please enter data in every data field.")
-
-    st.button("Submit", on_click =  InsertAccommoToRentOut)
+        else:
+            with st.sidebar:
+                placeholder = st.empty()
+                with placeholder:
+                    placeholder.warning("Please enter data in every data field.")
+                    time.sleep(3)
+                    placeholder = st.empty      
     
 def EnterWantedAccommodation_page():
 
@@ -302,7 +384,6 @@ def EnterWantedAccommodation_page():
     st.write("ENTER AND SUBMIT THE DETAILS OF THE ACCOMMODATION YOU ARE LOOKING FOR")
 
     st.write("NB: After entering data in each field (including the DATE), press ENTER/TAB to apply. If the date is already entered, begin by clicking within the DATE field and exiting it through the TAB to apply the date.")
-
 
     # FOR CLEARING DATA FIELDS
 
@@ -351,7 +432,6 @@ def EnterWantedAccommodation_page():
 
     """, unsafe_allow_html = True)
 
-
     #rawRecDte = st.text_input("Enter the DATE.", key = "dtaRecDte", on_change = None) # pvRecDte =
 
     rawRecDte = st.text_input("Enter the DATE.", key = "dtaRecDte", value=formatted_curdate,on_change = None)
@@ -368,9 +448,9 @@ def EnterWantedAccommodation_page():
 
     rawContactNo = st.text_input("Enter your BUSINESS CONTACT NUMBER", key = "dtaContactNo", on_change = None)
 
-
     def InsertAccommoWanted():
 
+        NumberOfAccs = 0
 
         # Convert all text in python variables to uppercase
 
@@ -388,83 +468,139 @@ def EnterWantedAccommodation_page():
 
         hgcContactNo = rawContactNo
 
-        rawRS = 'Tnt'    
-    
+        rawRS = 'Tnt' 
+
+        cursor = None 
+
+        cnnOne = None   
 
         # CHECK PRESENCE OF RECORD BY COUNTING RECORD'S ID
 
         try:               
 
-            cnnOne= sqlite3.connect('ATFDb.db')       
+            # Load the secrets from the secrets.toml file
+            secrets_path = os.path.abspath('.streamlit/secrets.toml')
+            st.secrets = toml.load(secrets_path)       
 
-            cur = cnnOne.cursor()       
+            cnnOne = psycopg2.connect(
+                host = st.secrets["database"]["db_host"],
+                dbname = st.secrets["database"]["db_name"],
+                user = st.secrets["database"]["db_user"],
+                password = st.secrets["database"]["db_pswd"],
+                port = st.secrets["database"]["db_port"]
+                )
 
-            RowsQuery="SELECT COUNT(*) FROM AccommoRecs WHERE EntryNo=?"       
+            cursor = cnnOne.cursor()       
 
-            cur.execute(RowsQuery, (hgcEntryNo,))           
+            RowsQuery="SELECT COUNT(*) FROM AccommoRecs WHERE EntryNo = %s"       
+
+            cursor.execute(RowsQuery, (hgcEntryNo,))           
 
             # Collect result of count
 
-            NumberOfAccs=cur.fetchone()[0]
+            NumberOfAccs=cursor.fetchone()[0]
 
-        except sqlite3.Error as e:
+        except Exception as e:
 
             st.warning(f"An error occurred: {e}")
 
         finally:
 
-            if cnnOne:
+            if cursor is not None:
 
-                cnnOne.close()
-                
+                cursor.close()
+
+            if cnnOne is not None:
+
+                cnnOne.close()                
 
         if NumberOfAccs > 0:
-
-            st.warning(f"{ hgcEntryNo} is not available. Please create a different entry number and try again.")
+            with st.sidebar:
+                placeholder = st.empty()
+                with placeholder:
+                    placeholder.warning(f"{ hgcEntryNo} is not available. Please create a different entry number and try again.")
+                    time.sleep(3)
+                    placeholder = st.empty()
 
         else:
 
-            if hgcRecDte and hgcCountry and hgcCity and hgcSuburb and hgcNoOfRooms and hgcEntryNo and hgcContactNo:            
+            #if hgcRecDte and hgcCountry and hgcCity and hgcSuburb and hgcNoOfRooms and hgcEntryNo and hgcContactNo:
 
-                try:                    
+            cursor = None
 
-                    cnnOne =sqlite3.connect('ATFDb.db')
+            cnnOne = None            
 
-                    cursor = cnnOne.cursor()
+            try:
+               # Load the secrets from the secrets.toml file
+                secrets_path = os.path.abspath('.streamlit/secrets.toml')
+                st.secrets = toml.load(secrets_path)       
 
-                    InsertDetailsQuery = "INSERT INTO AccommoRecs (RecDte,Country,City,Suburb,NoOfRooms,EntryNo,ContactNo,RS) VALUES (?,?,?,?,?,?,?,?)"
-                    
-                    cursor.execute(InsertDetailsQuery, (hgcRecDte,hgcCountry,hgcCity,hgcSuburb,hgcNoOfRooms,hgcEntryNo,hgcContactNo,rawRS))                    
+                cnnOne = psycopg2.connect(
+                    host = st.secrets["database"]["db_host"],
+                    dbname = st.secrets["database"]["db_name"],
+                    user = st.secrets["database"]["db_user"],
+                    password = st.secrets["database"]["db_pswd"],
+                    port = st.secrets["database"]["db_port"]
+                    )
 
-                    st.toast(f"Entry number {hgcEntryNo} inserted successfully.")                            
+                cursor = cnnOne.cursor()
 
-                    # persist the changes to database by calling cnnOne.commit() 
+                InsertDetailsQuery = "INSERT INTO AccommoRecs (RecDte,Country,City,Suburb,NoOfRooms,EntryNo,ContactNo,RS) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
+                
+                cursor.execute(InsertDetailsQuery, (hgcRecDte,hgcCountry,hgcCity,hgcSuburb,hgcNoOfRooms,hgcEntryNo,hgcContactNo,rawRS))                    
 
-                    cnnOne.commit()
+                #st.toast(f"Entry number {hgcEntryNo} inserted successfully.")                            
 
-                    # close the connection
+                # persist the changes to database by calling cnnOne.commit() 
+
+                cnnOne.commit()
+                
+            except Exception as ex:
+
+                sqlstate = ex.args[0]
+                with st.sidebar:
+                    placeholder = st.empty()
+                    with placeholder:
+                        placeholder.warning(f"Error inserting new record: {sqlstate}.")
+                        time.sleep(6)
+                        placeholder = st.empty()
+
+            finally:
+
+                # Close the connection
+
+                if cursor is not None:
+
+                    cursor.close()
+
+                if cnnOne is not None:
 
                     cnnOne.close()
 
-                except sqlite3.Error as ex:
+            #else:
 
-                    sqlstate = ex.args[0]
+                #st.warning("Please enter data in every data field.")
 
-                    st.warning(f"Error inserting new record: {sqlstate}.")
-
-                finally:
-
-                    # Close the connection
-
-                    if cnnOne:
-
-                        cnnOne.close()
-
-            else:
-
-                st.warning("Please enter data in every data field.")
-
-    st.button("Submit", on_click =  InsertAccommoWanted)
+    #st.button("Submit", on_click =  InsertAccommoWanted)
+    if st.sidebar.button('SUBMIT ENTRY'):
+        # Convert all text in python variables to uppercase
+        hgcRecDte = rawRecDte.upper()
+        hgcCountry = rawCountry.upper()
+        hgcCity = rawCity.upper()
+        hgcSuburb = rawSuburb.upper()
+        hgcNoOfRooms = rawNoOfRooms.upper()       
+        hgcEntryNo = rawEntryNo.upper()
+        hgcContactNo = rawContactNo
+        if hgcRecDte and hgcCountry and hgcCity and hgcSuburb and hgcNoOfRooms and hgcEntryNo and hgcContactNo:
+            InsertAccommoWanted()            
+            with st.sidebar:
+                placeholder = st.empty() 
+                with placeholder:                   
+                    placeholder.success("Record inserted successfully!")
+                    time.sleep(3)
+                    placeholder = st.empty()
+        else:
+            st.sidebar.warning("Please enter data in every data field.")
 
 def ViewAvailableAccommodation_page():
 
@@ -518,31 +654,81 @@ def ViewAvailableAccommodation_page():
 
     # VIEW LANDLORDS OFFERS
 
-    def viewLandlordsOffers():
+    def viewLandlordsOffers(cursor_factory=psycopg2.extras.DictCursor):
+        
+        # Load the secrets from the secrets.toml file
+        secrets_path = os.path.abspath('.streamlit/secrets.toml')
+        st.secrets = toml.load(secrets_path)       
 
-        cnnOne = sqlite3.connect("ATFDb.db")
+        cnnOne = psycopg2.connect(
+            host = st.secrets["database"]["db_host"],
+            dbname = st.secrets["database"]["db_name"],
+            user = st.secrets["database"]["db_user"],
+            password = st.secrets["database"]["db_pswd"],
+            port = st.secrets["database"]["db_port"]
+            )
 
-        cursor = cnnOne.cursor()
-
-        lldRS = 'Lld' 
-
-        st.write("RECORDS OF ACCOMMODATION ON OFFER")
-
+        # Prepare the cursor
+        cursor = cnnOne.cursor()        
+        
+        # Prepare criteria values        
+        lldRS = 'Lld'
         upcaSuburd = lldSuburb.upper()
-
         upcaCity = lldCity.upper()
-
         upcaCountry = lldCountry.upper()
+
+        # Report header        
+        st.write("RECORDS OF ACCOMMODATION ON OFFER") 
 
         st.write(f"in {upcaSuburd}, {upcaCity}, {upcaCountry}")
 
-        st.write(f"as at {formatted_curdate}")    
+        st.write(f"as at {formatted_curdate}")  
 
-        df = cursor.execute("SELECT RecDte,NoOfRooms,Rent,ContactNo FROM AccommoRecs WHERE RS = ? and  Country COLLATE NONCASE LIKE ? and City COLLATE NONCASE LIKE ? and Suburb COLLATE NONCASE LIKE ?", (lldRS,lldCountry,lldCity,lldSuburb,))  # and NoOfRooms = ?  lldNoOfRooms, 
+        # Define the Query with 4 criteria
+        query = "SELECT recdte,noofrooms,rent,contactno FROM AccommoRecs WHERE RS = %s and Country = %s and City = %s and Suburb = %s"
+        # Provide criteria values
+        params = (lldRS,upcaCountry,upcaCity,upcaSuburd) 
+        # Execute the query
+        cursor.execute(query, params)
+        # collect all the matching records
+        records = cursor.fetchall()
 
-        st.dataframe(df)
+        # initialize an empty list to store records
+        data = []
 
-    st.button("View", on_click =  viewLandlordsOffers)
+        # Populate the list using a for loop
+        for record in records: 
+            data.append({
+                'Date_Posted': record[0],
+                'No_of_Rooms_Available': record[1],
+                'Rent/Month': record[2],
+                'Bus_Contact_No': record[3]
+                 })  
+            
+        # Create a DataFrame from the list
+        df = pd.DataFrame(data)
+
+        # Display the DataFrame in Streamlit
+        st.dataframe(df)       
+        
+    #st.button("View", on_click =  viewLandlordsOffers)
+    if st.sidebar.button("VIEW PROVIDERS POSTS"):      
+
+        #lldRS = 'Lld'
+        upcaSuburd = lldSuburb.upper()
+        upcaCity = lldCity.upper()
+        upcaCountry = lldCountry.upper()
+
+        if lldCountry and lldCity and lldSuburb:
+            viewLandlordsOffers()  #  (cursor_factory=psycopg2.extras.DictCursor)
+            with st.sidebar:
+                placeholder = st.empty()
+                with placeholder:
+                    placeholder.success("Check the records below the form!")
+                    time.sleep(3)
+                    placeholder = st.empty()
+        else:
+            st.warning("Please enter data in every data field.")
 
 def ViewWantedAccommodation_page():
 
@@ -598,29 +784,205 @@ def ViewWantedAccommodation_page():
 
     def viewSearchesByTenants():
 
-        cnnOne = sqlite3.connect("ATFDb.db")
+        # Load the secrets from the secrets.toml file
+        secrets_path = os.path.abspath('.streamlit/secrets.toml')
+        st.secrets = toml.load(secrets_path)       
 
-        cursor = cnnOne.cursor()
+        cnnOne = psycopg2.connect(
+            host = st.secrets["database"]["db_host"],
+            dbname = st.secrets["database"]["db_name"],
+            user = st.secrets["database"]["db_user"],
+            password = st.secrets["database"]["db_pswd"],
+            port = st.secrets["database"]["db_port"]
+            )
 
+        # Prepare the cursor
+        cursor = cnnOne.cursor()        
+
+        # Prepare criteria values
         tntRS = 'Tnt' 
-
-        st.write("RECORDS OF SEARCHES FOR ACCOMMODATION")
-
         uppSuburd = tntSuburb.upper()
-
         uppCity = tntCity.upper()
-
         uppCountry = tntCountry.upper()
+
+        # Report header
+        st.write("RECORDS OF SEARCHES FOR ACCOMMODATION")
 
         st.write(f"in {uppSuburd}, {uppCity}, {uppCountry}")
 
         st.write(f"as at {formatted_curdate}")    
 
-        df = cursor.execute("SELECT RecDte,NoOfRooms,ContactNo FROM AccommoRecs WHERE RS = ? and  Country COLLATE NONCASE LIKE ? and City COLLATE NONCASE LIKE ? and Suburb COLLATE NONCASE LIKE ?", (tntRS,tntCountry,tntCity,tntSuburb,))  
+        # Define the Query with 4 criteria
+        query = "SELECT RecDte,NoOfRooms,ContactNo FROM AccommoRecs WHERE RS = %s AND Country = %s AND City = %s AND Suburb = %s"  
+        # Provide criteria values
+        params = (tntRS,uppCountry,uppCity,uppSuburd) 
+        # Execute the query
+        cursor.execute(query, params)
+        # collect all the matching records
+        records = cursor.fetchall()
 
+        # initialize an empty list to store records
+        data = []
+
+        # Populate the list using a for loop
+        for record in records: 
+            data.append({
+                'Date_Posted': record[0],
+                'No_of_Rooms_Wanted': record[1],                
+                'Bus_Contact_No': record[2]
+                 })  
+            
+        # Create a DataFrame from the list
+        df = pd.DataFrame(data)
+
+        # Display the DataFrame in Streamlit
         st.dataframe(df)
 
-    st.button("View", on_click =  viewSearchesByTenants)
+    #st.button("View", on_click =  viewSearchesByTenants)
+    if st.sidebar.button("VIEW SEEKERS POSTS"):      
+
+        #lldRS = 'Tnt'
+        uppSuburb = tntSuburb.upper()
+        uppCity = tntCity.upper()
+        uppCountry = tntCountry.upper()
+
+        if uppCountry and uppCity and uppSuburb:
+            viewSearchesByTenants()  #  (cursor_factory=psycopg2.extras.DictCursor)
+            with st.sidebar:
+                placeholder = st.empty()
+                with placeholder:
+                    placeholder.success("Check report below the form!")
+                    time.sleep(3)
+                    placeholder = st.empty()
+        else:
+            with st.sidebar:
+                placeholder = st.empty()
+                with placeholder:
+                    placeholder.warning("Please enter data in every data field.")
+                    time.sleep(3)
+                    placeholder = st.empty()
+
+def DeleteEntries_page():
+
+    st.header("Delete Entries Page")
+
+    st.write("DELETE YOUR POSTS THAT HAVE EXPIRED")
+
+    st.write("Enter The UNIQUE REF of the Entry You Want to Delete and then Click the DELETE ENTRY Button")
+
+    st.write("NB: After entering your ENTRY REF NUMBER, press ENTER/TAB to apply.")
+
+    # FOR CLEARING DATA FIELDS
+
+    # Initialize session state for the input if it doesn't exist 
+    if "dtaEntryNo" not in st.session_state:
+
+        st.session_state["dtaEntryNo"] = ""             
+
+    # Use st.markdown to inject custom CSS
+
+    st.markdown("""
+
+    <style>
+
+    .stTextInput input {text-transform: uppercase;
+
+    }
+
+    </style>
+
+    """, unsafe_allow_html = True)    
+
+    delEntryNo = st.text_input("Enter the ENTRY REF NUMBER of the Entry You Want to Delete.", key = "dtaEntryNo", on_change = None)
+
+    # VIEW SEARCHES BY TENANTS
+
+    def DeleteEntry():
+
+        try:
+
+            # Initialize the connection
+            # Load the secrets from the secrets.toml file
+            secrets_path = os.path.abspath('.streamlit/secrets.toml')
+            st.secrets = toml.load(secrets_path)       
+
+            cnnOne = psycopg2.connect(
+                host = st.secrets["database"]["db_host"],
+                dbname = st.secrets["database"]["db_name"],
+                user = st.secrets["database"]["db_user"],
+                password = st.secrets["database"]["db_pswd"],
+                port = st.secrets["database"]["db_port"]
+                )
+
+            # Prepare the cursor
+            cursor = cnnOne.cursor()        
+
+            # Prepare criteria values            
+            capEntryNo = delEntryNo.upper()
+
+            # check presence of EntryNo
+            
+            RowsQuery="SELECT COUNT(*) FROM AccommoRecs WHERE EntryNo = %s"       
+
+            cursor.execute(RowsQuery, (capEntryNo,))           
+
+            # Collect result of count
+
+            itemfrequency=cursor.fetchone()[0]
+
+            if itemfrequency > 0:
+                # Define the Query with 4 criteria
+                query = "DELETE FROM AccommoRecs WHERE EntryNo = %s"  
+                # Provide criteria values
+                params = (capEntryNo,) 
+                # Execute the query
+                cursor.execute(query, params)                
+                # Commit the changes to the database
+                cnnOne.commit()
+                with st.sidebar:
+                    placeholder = st.empty()
+                    with placeholder:
+                        placeholder.success(f"Entry {capEntryNo} sucessfully deleted!")
+                        time.sleep(3)
+                        placeholder = st.empty()
+
+            else:
+                with st.sidebar:
+                    placeholder = st.empty()
+                    with placeholder:
+                        placeholder.warning(f"Entry Ref Number {capEntryNo} not found!")
+                        time.sleep(3)
+                        placeholder = st.empty()                    
+                
+        except Exception as ex:
+
+            sqlstate = ex.args[0]
+            with st.sidebar:
+                placeholder = st.empty()
+                with placeholder:
+                    placeholder.warning(f"Error deleting record: {sqlstate}.")
+                    time.sleep(6)
+                    placeholder = st.empty()  
+
+        finally:
+
+            # Close the connection
+
+            if cursor is not None:
+
+                cursor.close()
+
+            if cnnOne is not None:
+
+                cnnOne.close()        
+               
+    #st.button("View", on_click =  viewSearchesByTenants)
+    if st.sidebar.button("DELETE ENTRY"):
+        #lldRS = 'Tnt'
+        capEntryNo = delEntryNo.upper() 
+        #if capEntryNo:
+        DeleteEntry()  #  (cursor_factory=psycopg2.extras.DictCursor)
+           
 
 # ---Siderbar Navigation ---
 
@@ -630,7 +992,7 @@ with st.sidebar:
 
     st.title("App Pages Panel")
 
-    page_options = ["Home Page", "Enter Details Of Accommodation You Want To Rent Out", "Enter Details Of Accommodation Wanted", "View Posts Of Accommodation Available In:","View Posts Of Searches For Accommodation In:"]
+    page_options = ["Home Page", "Enter Details Of Accommodation You Want To Rent Out", "Enter Details Of Accommodation Wanted", "View Posts Of Accommodation Available In:","View Posts Of Searches For Accommodation In:","Delete Entries"]
 
     # Create the radio buttons
 
@@ -657,6 +1019,10 @@ elif selected_page == "View Posts Of Accommodation Available In:":
 elif selected_page == "View Posts Of Searches For Accommodation In:":
 
     ViewWantedAccommodation_page()
+
+elif selected_page == "Delete Entries":
+
+    DeleteEntries_page()
 
 # VIEW ACCOMMODATION WANTED
 
@@ -693,9 +1059,17 @@ def viewAccommodationWanted():
         st.dataframe(accommodationWanted_df) # Ue st.dataframe for an interactive table
 
     else:
+        with st.sidebar:
+            placeholder = st.empty()
+            with placeholder:
+                placeholder.info("No searches for accommodation in the specified area")
+                time.sleep(5)
+                placeholder = st.empty()
 
-        st.info("No searches for accommodation in the specified area")
+if selected_page == "Enter Details Of Accommodation You Want To Rent Out" or selected_page == "Enter Details Of Accommodation Wanted" or selected_page == "View Posts Of Accommodation Available In:" or selected_page == "View Posts Of Searches For Accommodation In:" or selected_page == "Delete Entries":    
+    with st.sidebar:
+        st.button("CLEAR DATA FIELDS", on_click = clearFormFields)
 
-if selected_page == "Enter Details Of Accommodation You Want To Rent Out" or selected_page == "Enter Details Of Accommodation Wanted" or selected_page == "View Posts Of Accommodation Available In:" or selected_page == "View Posts Of Searches For Accommodation In:":
-
-    st.button("Clear Data Fields", on_click = clearFormFields)
+#if st.sidebar.button('DELETE ENTRY'):
+    # Your code to delete the entry goes here
+    #st.sidebar.success("Record deleted successfully!")
