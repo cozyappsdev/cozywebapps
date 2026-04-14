@@ -1,13 +1,12 @@
 import streamlit as st
-from streamlit import connections
 import psycopg2
-import psycopg2.extras
 import sqlalchemy
 import pandas as pd
 import os
 from datetime import datetime, date
 import time
 import toml
+#from sqlalchemy import create_engine
 
 #current_date = date.today()
 
@@ -38,12 +37,12 @@ try:
     st.secrets = toml.load(secrets_path)       
 
     cnnOne = psycopg2.connect(
-        host = st.secrets["database"]["db_host"],
-        dbname = st.secrets["database"]["db_name"],
-        user = st.secrets["database"]["db_user"],
-        password = st.secrets["database"]["db_pswd"],
-        port = st.secrets["database"]["db_port"]
-        )
+        host = st.secrets["database"]["host"],
+        dbname = st.secrets["database"]["database"],
+        user = st.secrets["database"]["username"],
+        password = st.secrets["database"]["password"],
+        port = st.secrets["database"]["port"]
+        )    
 
     cursor = cnnOne.cursor()
 
@@ -231,18 +230,17 @@ def EnterAvailableAccommodation_page():
         # CHECK PRESENCE OF RECORD BY COUNTING RECORD'S ID
 
         try:
-            #cnnOne = st.connection("postgresql", type="sql")
             # Load the secrets from the secrets.toml file
             secrets_path = os.path.abspath('.streamlit/secrets.toml')
-            st.secrets = toml.load(secrets_path)      
-            
+            st.secrets = toml.load(secrets_path)       
+
             cnnOne = psycopg2.connect(
-                host = st.secrets["database"]["db_host"],
-                dbname = st.secrets["database"]["db_name"],
-                user = st.secrets["database"]["db_user"],
-                password = st.secrets["database"]["db_pswd"],
-                port = st.secrets["database"]["db_port"]
-                )
+                host = st.secrets["database"]["host"],
+                dbname = st.secrets["database"]["database"],
+                user = st.secrets["database"]["username"],
+                password = st.secrets["database"]["password"],
+                port = st.secrets["database"]["port"]
+                )    
 
             cursor = cnnOne.cursor()       
 
@@ -292,19 +290,15 @@ def EnterAvailableAccommodation_page():
             try:
                 # Load the secrets from the secrets.toml file
                 secrets_path = os.path.abspath('.streamlit/secrets.toml')
-                st.secrets = toml.load(secrets_path)       # st.read_secrets(secrets_path)  #  
-               
-                # Load the secrets from the secrets.toml file
-                secrets_path = os.path.abspath('.streamlit/secrets.toml')
                 st.secrets = toml.load(secrets_path)       
 
                 cnnOne = psycopg2.connect(
-                    host = st.secrets["database"]["db_host"],
-                    dbname = st.secrets["database"]["db_name"],
-                    user = st.secrets["database"]["db_user"],
-                    password = st.secrets["database"]["db_pswd"],
-                    port = st.secrets["database"]["db_port"]
-                    )
+                    host = st.secrets["database"]["host"],
+                    dbname = st.secrets["database"]["database"],
+                    user = st.secrets["database"]["username"],
+                    password = st.secrets["database"]["password"],
+                    port = st.secrets["database"]["port"]
+                    )    
 
                 cursor = cnnOne.cursor()
                 
@@ -482,12 +476,12 @@ def EnterWantedAccommodation_page():
             st.secrets = toml.load(secrets_path)       
 
             cnnOne = psycopg2.connect(
-                host = st.secrets["database"]["db_host"],
-                dbname = st.secrets["database"]["db_name"],
-                user = st.secrets["database"]["db_user"],
-                password = st.secrets["database"]["db_pswd"],
-                port = st.secrets["database"]["db_port"]
-                )
+                host = st.secrets["database"]["host"],
+                dbname = st.secrets["database"]["database"],
+                user = st.secrets["database"]["username"],
+                password = st.secrets["database"]["password"],
+                port = st.secrets["database"]["port"]
+                )    
 
             cursor = cnnOne.cursor()       
 
@@ -535,12 +529,12 @@ def EnterWantedAccommodation_page():
                 st.secrets = toml.load(secrets_path)       
 
                 cnnOne = psycopg2.connect(
-                    host = st.secrets["database"]["db_host"],
-                    dbname = st.secrets["database"]["db_name"],
-                    user = st.secrets["database"]["db_user"],
-                    password = st.secrets["database"]["db_pswd"],
-                    port = st.secrets["database"]["db_port"]
-                    )
+                    host = st.secrets["database"]["host"],
+                    dbname = st.secrets["database"]["database"],
+                    user = st.secrets["database"]["username"],
+                    password = st.secrets["database"]["password"],
+                    port = st.secrets["database"]["port"]
+                    )    
 
                 cursor = cnnOne.cursor()
 
@@ -653,19 +647,19 @@ def ViewAvailableAccommodation_page():
 
     # VIEW LANDLORDS OFFERS
 
-    def viewLandlordsOffers(cursor_factory=psycopg2.extras.DictCursor):
+    def viewLandlordsOffers(): # cursor_factory=psycopg2.extras.DictCursor):
         
         # Load the secrets from the secrets.toml file
         secrets_path = os.path.abspath('.streamlit/secrets.toml')
         st.secrets = toml.load(secrets_path)       
 
         cnnOne = psycopg2.connect(
-            host = st.secrets["database"]["db_host"],
-            dbname = st.secrets["database"]["db_name"],
-            user = st.secrets["database"]["db_user"],
-            password = st.secrets["database"]["db_pswd"],
-            port = st.secrets["database"]["db_port"]
-            )
+            host = st.secrets["database"]["host"],
+            dbname = st.secrets["database"]["database"],
+            user = st.secrets["database"]["username"],
+            password = st.secrets["database"]["password"],
+            port = st.secrets["database"]["port"]
+            )        
 
         # Prepare the cursor
         cursor = cnnOne.cursor()        
@@ -788,13 +782,13 @@ def ViewWantedAccommodation_page():
         st.secrets = toml.load(secrets_path)       
 
         cnnOne = psycopg2.connect(
-            host = st.secrets["database"]["db_host"],
-            dbname = st.secrets["database"]["db_name"],
-            user = st.secrets["database"]["db_user"],
-            password = st.secrets["database"]["db_pswd"],
-            port = st.secrets["database"]["db_port"]
+            host = st.secrets["database"]["host"],
+            dbname = st.secrets["database"]["database"],
+            user = st.secrets["database"]["username"],
+            password = st.secrets["database"]["password"],
+            port = st.secrets["database"]["port"]
             )
-
+                
         # Prepare the cursor
         cursor = cnnOne.cursor()        
 
@@ -900,21 +894,19 @@ def DeleteEntries_page():
 
         try:
 
-            # Initialize the connection
             # Load the secrets from the secrets.toml file
             secrets_path = os.path.abspath('.streamlit/secrets.toml')
             st.secrets = toml.load(secrets_path)       
 
             cnnOne = psycopg2.connect(
-                host = st.secrets["database"]["db_host"],
-                dbname = st.secrets["database"]["db_name"],
-                user = st.secrets["database"]["db_user"],
-                password = st.secrets["database"]["db_pswd"],
-                port = st.secrets["database"]["db_port"]
-                )
+                host = st.secrets["database"]["host"],
+                dbname = st.secrets["database"]["database"],
+                user = st.secrets["database"]["username"],
+                password = st.secrets["database"]["password"],
+                port = st.secrets["database"]["port"]
+                )    
 
-            # Prepare the cursor
-            cursor = cnnOne.cursor()        
+            cursor = cnnOne.cursor()      
 
             # Prepare criteria values            
             capEntryNo = delEntryNo.upper()
