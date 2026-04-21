@@ -1,4 +1,4 @@
-pandas
+pandas>=1.4.0,<3 
 psycopg2==2.9.11
 psycopg2_binary==2.9.11
 streamlit
