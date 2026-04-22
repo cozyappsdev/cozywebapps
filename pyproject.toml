@@ -3,7 +3,7 @@ requires = ["setuptools","wheels"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cozyaccommodation-pokugara"
+name = "pokugara"
 version = "0.1.0"
 description = "Bringing the meeting place for accommodation seekers and suppliers convenienly in your own home or office!"
 authors = [{name = "Cozymore Ngaribvume", email = "cngaribvume@gmail.com"}]
