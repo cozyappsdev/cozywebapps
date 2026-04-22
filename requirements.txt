@@ -1,5 +1,0 @@
-pandas>=1.4.0,<3 
-psycopg2==2.9.11
-psycopg2_binary==2.9.11
-streamlit==1.55.0
-toml==0.10.2
