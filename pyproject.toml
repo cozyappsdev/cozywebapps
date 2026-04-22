@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools","wheels"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cozyaccommodation-pokugara"
+version = "0.1.0"
+description = "Bringing the meeting place for accommodation seekers and suppliers convenienly in your own home or office!"
+authors = [{name = "Cozymore Ngaribvume", email = "cngaribvume@gmail.com"}]
+license = "MIT AND (Apache-2.0 OR BSD-2-Clause)"
+dependemcies = ["pandas>=1.4.0,<3","streamlit==1.55.0","toml==0.10.2"]
+	
+	
