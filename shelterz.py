@@ -29,7 +29,7 @@ cnnOne = pg8000.native.Connection(
     user = st.secrets["db"]["user"], 
     password = st.secrets["db"]["password"], 
     port = st.secrets["db"]["port"], 
-    # ssl_context = True   # Important for Aiven
+    ssl_context = True   # Important for Aiven
 )
 
 # __CONNECTION END__
