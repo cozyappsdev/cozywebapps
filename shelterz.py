@@ -21,7 +21,7 @@ class DatabaseConnection:
             return DatabaseConnection._instance
         
 # Usage
-db_config = st.secrets["postgres"]  
+db_config = st.secrets["db"]  
 cnnOne = DatabaseConnection.get_instance(db_config)
 
 # __CONNECTION END__
