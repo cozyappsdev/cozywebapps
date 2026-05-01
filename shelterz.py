@@ -22,7 +22,15 @@ class DatabaseConnection:
         
 # Usage
 db_config = st.secrets["db"]  
-cnnOne = DatabaseConnection.get_instance(db_config)
+# cnnOne = DatabaseConnection.get_instance(db_config)
+cnnOne = pg8000.native.Connection(
+    host = st.secrets["db"]["host"],  
+    database = st.secrets["db"]["database"],  
+    user = st.secrets["db"]["user"], 
+    password = st.secrets["db"]["password"], 
+    port = st.secrets["db"]["port"], 
+    ssl_context = True   # Important for Aiven
+)
 
 # __CONNECTION END__
 
