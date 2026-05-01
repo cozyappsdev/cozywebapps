@@ -112,7 +112,7 @@ with st.expander("", expanded=is_expanded):
                             RS='ws'                        
                         cnnOne.run("INSERT INTO AccommoRecs (RecDte,Country,City,Suburb,NoOfRooms,Rent,EntryNo,ContactNo,RS) VALUES (:rdte, :cntry, :cty, :sbb, :rms, :rnt, :entno, :cctno, :rs)", 
                             rdte=RecDte, cntry=Country, cty=City, sbb=Suburb, rms=NoOfRooms, rnt=Rent, entno=EntryNo, cctno=ContactNo, rs=RS)                  
-                        cnnOne.commit()
+                        # cnnOne.commit()
                         st.cache_data.clear() # Reset cache to show updated data                        
                         st.toast("Record successfully inserted.")
 
@@ -139,7 +139,7 @@ with st.expander("", expanded=is_expanded):
                             RS='ws'
                         cnnOne.run("INSERT INTO AccommoRecs (RecDte,Country,City,Suburb,NoOfRooms,EntryNo,ContactNo,RS) VALUES (:rdte, :cntry, :cty, :sbb, :noofrms, :entno, :cctno, :rs)", 
                             rdte=RecDte, cntry=Country, cty=City, sbb=Suburb, noofrms=NoOfRooms,entno=EntryNo, cctno=ContactNo, rs=RS)
-                        cnnOne.commit()                        
+                        # cnnOne.commit()                        
                         st.cache_data.clear() # Reset cache to show updated data
                         st.toast("Record successfully inserted.")    
 
@@ -241,7 +241,7 @@ elif  Tsk == "Delete Your Posts":
                     st.toast(f"Unique Identifier {EntryNo} not found.")
                 else:                        
                     cnnOne.run("DELETE FROM AccommoRecs WHERE EntryNo = :pri", pri=EntryNo)
-                    cnnOne.commit()                                               
+                    # cnnOne.commit()                                               
                     st.cache_data.clear() # Reset cache to show updated data
                     st.toast(f"Post with Unique Identifier {EntryNo} successfully deleted!")
 
