@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools","wheels"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trswops"
+version = "0.1.0"
+description = "Where all teachers intending to swop can EASILY meet and conclude their swopping deals!"
+authors = [{name = "Cozymore Ngaribvume", email = "instipuse@gmail.com
+
+packages = [{include = "shelterz"}]
+
+license = "MIT AND (Apache-2.0 OR BSD-2-Clause)"
+
+dependemcies = ["pandas>=1.4.0,<3","streamlit==1.55.0","toml==0.10.2","pg8000==1.31.5"]
+
+
+
+
+
+
+
+
+
+	
+	
