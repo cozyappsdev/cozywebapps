@@ -349,7 +349,7 @@ elif  Tsk == "DELETE MY ENTRIES":
                     st.toast(f"Unique Identifier {EUId} not found.")
                 else:
                     if cnnOne:                        
-                        cnnOne.run("DELETE FROM TrPosts WHERE EntryNo = :pri", pri=EUId)
+                        cnnOne.run("DELETE FROM TrPosts WHERE EnryUId = :pri", pri=EUId)
                         # cnnOne.commit()                                               
                         st.cache_data.clear() # Reset cache to show updated data
                         st.toast(f"Post with Unique Identifier {EUId} successfully deleted!")
