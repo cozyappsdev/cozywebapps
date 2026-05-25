@@ -377,7 +377,7 @@ button_label = "Show Contact Info" if st.session_state.in_state else "Close"
 st.sidebar.button(button_label, on_click=toggle_button)
 
 if button_label == "Close":
-    st.sidebar.write("instipuse@gmail.com")
+    st.sidebar.write("instipulse@gmail.com")
 
 with st.sidebar:
     st.divider()
