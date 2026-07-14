@@ -43,8 +43,6 @@ except DatabaseError as e:
 if 'infomsg' not in st.session_state:
     st.session_state.infomsg = ""
 
-
-
 @st.cache_data(ttl=600)
 def count_EUId():
     result = cnnOne.run("SELECT COUNT(*) FROM TrPosts WHERE EnryUId = :euid", euid=EUId)
@@ -220,7 +218,6 @@ st.title("Teacher-Swops")
 
 st.write("Where all teachers intending to swop can EASILY meet and conclude their swopping deals!")
 
-
 # 1. Create Table
     
 if cnnOne:
@@ -332,8 +329,6 @@ if Tsk == "FIND MY SWOP MATCHES":
            
             st.toast("No members with whom you may swop. Check again after some time when more posts have been added.")
 
-# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 # Place 'View ALL Posts' logic here 
 elif Tsk == "View ALL Posts":           
     
@@ -377,9 +372,7 @@ elif Tsk == "View ALL Posts":
             
         else:
            
-            st.toast("No posts were found!") 
-        
-# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+            st.toast("No posts were found!")
 
 elif  Tsk == "DELETE MY ENTRIES":                
         EUId = st.text_input("Enter UNIQUE IDENTIFIER you submitted for this subject's entry")                              
