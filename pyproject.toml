@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "trswops"
 version = "0.1.0"
 description = "Where all teachers intending to swop can EASILY meet and conclude their swopping deals!"
-authors = [{name = "Cozymore Ngaribvume", email = "instipuse@gmail.com
+authors = [{name = "Cozymore Ngaribvume", email = "instipuse@gmail.com"}]
 
 packages = [{include = "shelterz"}]
 
