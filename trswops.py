@@ -363,8 +363,7 @@ elif Tsk == "View ALL Posts":
                     'Subject_Taught': one_post[5],
                     'Taught_to_Level': one_post[6],
                     'Current_District': one_post[7],                               
-                    'District_Desired': one_post[8],
-                    # 'Post_RefId': one_post[9]                    
+                    'District_Desired': one_post[8]                                       
                     })
             st.write("")
             st.write(f"LIST OF ALL THE POSTS")
