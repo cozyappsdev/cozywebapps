@@ -249,7 +249,7 @@ if cnnOne:
             )
             """)
 
-Tsk = st.selectbox("Task", ["Click on Down Arrow to Select a Task","ENTER MY DETAILS","FIND MY SWOP MATCHES","DELETE MY ENTRIES","View ALL Posts"])
+Tsk = st.selectbox("Task", ["Click on Down Arrow to Select a Task","ENTER MY DETAILS","FIND MY SWOP MATCHES","View ALL Posts","DELETE MY ENTRIES"])
 is_expanded = (Tsk == "ENTER MY DETAILS" or Tsk == "FIND MY SWOP MATCHES" or Tsk == "DELETE MY ENTRIES" or Tsk == "View ALL Posts")
 # 3. Insert New Records
 with st.expander("", expanded=is_expanded):    
