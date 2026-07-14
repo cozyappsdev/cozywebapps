@@ -16,7 +16,7 @@ formatted_curdate = current_date.strftime("%d/%m/%Y  %H:%M:%S")
 # Define the cached resourc function
 @st.cache_resource
 def get_db_connection(TrSwpsDb):             
-    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    
     # Retrieve credentials from streamlit secrets
     creds = st.secrets["TrSwps_db"]
     # 2. Establish connection to database for this app in Aiven instance
@@ -28,7 +28,7 @@ def get_db_connection(TrSwpsDb):
         port = creds["port"], 
         ssl_context = True   # Important for Aiven # must be activated to to connect to Aiven PostgreSQL
     )    
-    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    
 try:
     cnnOne = get_db_connection("TrSwpsDb")
 except ConnectionError:
