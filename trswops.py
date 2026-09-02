@@ -63,7 +63,7 @@ subjects=[
     "BIOLOGY",
     "BUILDING TECHNOLOGY & DESIGN",
     "BUSINESS STUDIES",
-    "CHEMESTRY",
+    "CHEMISTRY",
     "COMBINED SCIENCE",
     "COMMERCE",
     "COMPUTER SCIENCE",
@@ -96,6 +96,7 @@ subjects=[
     "PRIMARY GENERAL",
     "PRINCIPLES OF ACCOUNTS",
     "PURE MATHEMATICS",
+    "SHONA",
     "SOCIAL STUDIES",
     "SOCIOLOGY",
     "TECHNICAL DESIGN",
@@ -219,7 +220,7 @@ districts=[
 #  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 # 1 Page Cocfiguration & Setup
-st.set_page_config(page_title="School Allocatio App", layout="wide")
+st.set_page_config(page_title="Mutual Transfer & Cross Swap Portal for Civil Service Teachers in Zimbabwe", layout="wide")
 
 # 2 Sidebar Navigation
 st.sidebar.title("Navigation Menu")
@@ -230,9 +231,10 @@ page = st.sidebar.radio(
 
 # 3 Page Functions
 def show_welcome():
-    st.title("Welcome to the ZIM EDUCATORS SWOPS Portal")
-    st.write("""
-             This application is designed to facilitate the search for swop matches for class teachers, school heads, and deputy school heads in all schools throughout Zimbabwe. Please use the **Navigation Menu** on the left to access the respective swop pages
+    st.title("Teacher Cross Transfers & Mutual Swaps")
+    st.subheader("Connect with fellow public school teachers in Zimbabwe to arrange official mutual swaps.")
+    st.markdown("""
+             Welcome to the matching platform for civil service teachers under the **Ministry of Primary and Secondary Education (MoPSE)** seeking **Mutual Cross Transfers**. This application helps you locate another teacher for an official swap before submitting your **Intra-District, Intra-Provincial, or Inter-Provincial transfer forms** to the Public Service Commission. Please use the **Navigation Menu** on the left to access the respective swop pages
              """)
 
 cnnOne = get_db_connection("TrSwps_db")
