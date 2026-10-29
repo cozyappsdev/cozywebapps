@@ -16,19 +16,17 @@ formatted_curdate = current_date.strftime("%d/%m/%Y  %H:%M:%S")
 
 # Define the cached resourc function
 @st.cache_resource
-def get_db_connection(db_name=None):             
-    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # Retrieve credentials from streamlit secrets
-    creds = st.secrets["TrSwps_db"]
-    # 2. create proper ssl context for Neon / Aiven ssl_context = ssl.create_default_context()
-    return pg8000.native.Connection(
-        host = creds["host"],  
-        database = creds["database"], # will be 'neondb' on Neon  
-        user = creds["user"], 
-        password = creds["password"], 
-        port = creds["port"], 
-        ssl_context=context
-    )    
+def get_db_connection(_db_name=None):
+ creds = st.secrets["TrSwps_db"]
+ conn = psycopg2.connect(
+ host=creds["host"],
+ port=creds["port"],
+ dbname=creds["database"],
+ user=creds["user"],
+ password=creds["password"],
+ sslmode=creds.get("sslmode", "require")
+ )
+ return conn    
     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 try:
     cnnOne = get_db_connection("TrSwpsDb")
