@@ -17,8 +17,22 @@ formatted_curdate = current_date.strftime("%d/%m/%Y  %H:%M:%S")
 # Define the cached resourc function
 @st.cache_resource
 def get_db_connection(_db_name=None):
+    # make psycopg2 behave like old .run() for now
+class ConnWrapper:
+    def __init__(self, conn):
+        self.conn = conn
+    def run(self, sql):
+        with self.conn.cursor() as cur:
+            cur.execute(sql)
+            try:
+                return cur.fetchall()
+            except:
+                self.conn.commit()
+                return []
+
+def get_db_connection(_db_name=None):
     c = st.secrets["TrSwps_db"]
-    return psycopg2.connect(
+    raw = psycopg2.connect(
         host=c["host"],
         port=c["port"],
         dbname=c["database"],
@@ -26,6 +40,7 @@ def get_db_connection(_db_name=None):
         password=c["password"],
         sslmode="require"
     )
+    return ConnWrapper(raw)
     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 try:
     cnnOne = get_db_connection("TrSwpsDb")
