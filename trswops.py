@@ -1,11 +1,11 @@
 import streamlit as st
 import pg8000.native
-import ssl
 from pg8000.exceptions import InterfaceError, DatabaseError
 from datetime import datetime, date
 import pandas as pd
 import toml
 import time
+import psycopg2
 
 # Autofill Date Field
 current_date = datetime.now()
@@ -16,19 +16,16 @@ formatted_curdate = current_date.strftime("%d/%m/%Y  %H:%M:%S")
 
 # Define the cached resourc function
 @st.cache_resource
-def get_db_connection(db_name=None):             
-    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # Retrieve credentials from streamlit secrets
-    creds = st.secrets["TrSwps_db"]
-    # 2. create proper ssl context for Neon / Aiven ssl_context = ssl.create_default_context()
-    return pg8000.native.Connection(
-        host = creds["host"],  
-        database = creds["database"], # will be 'neondb' on Neon  
-        user = creds["user"], 
-        password = creds["password"], 
-        port = creds["port"], 
-        ssl_context=context
-    )   
+def get_db_connection(_db_name=None):
+    c = st.secrets["TrSwps_db"]
+    return psycopg2.connect(
+        host=c["host"],
+        port=c["port"],
+        dbname=c["database"],
+        user=c["user"],
+        password=c["password"],
+        sslmode="require"
+    )
     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 try:
     cnnOne = get_db_connection("TrSwpsDb")
