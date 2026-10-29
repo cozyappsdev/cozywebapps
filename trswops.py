@@ -27,7 +27,7 @@ def get_db_connection(db_name=None):
         user = creds["user"], 
         password = creds["password"], 
         port = creds["port"], 
-        ssl_context = ssl_context
+        ssl_context = context
     )    
     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 try:
