@@ -5,7 +5,6 @@ from datetime import datetime, date
 import pandas as pd
 import toml
 import time
-import psycopg2
 
 # Autofill Date Field
 current_date = datetime.now()
@@ -14,45 +13,21 @@ formatted_curdate = current_date.strftime("%d/%m/%Y  %H:%M:%S")
 
 # __CONNECTION START__
 
-class ConnWrapper:
- def __init__(self, conn):
- self.conn = conn
-    
-    def run(self, sql, params=None):
-        with self.conn.cursor() as cur:
-            cur.execute(sql, params or ())
-            try:
-                return cur.fetchall()
-            except:
-                self.conn.commit()
-                return []
-
+# Define the cached resourc function
 @st.cache_resource
-def get_db_connection(_db_name=None):
-    c = st.secrets["TrSwps_db"]
-    raw = psycopg2.connect(
-        host=c["host"],
-        port=c["port"],
-        dbname=c["database"],
-        user=c["user"],
-        password=c["password"],
-        sslmode="require"
-    )
-    return ConnWrapper(raw)
-
-cnnOne = get_db_connection("TrSwpsDb")
-
-def get_db_connection(_db_name=None):
-    c = st.secrets["TrSwps_db"]
-    raw = psycopg2.connect(
-        host=c["host"],
-        port=c["port"],
-        dbname=c["database"],
-        user=c["user"],
-        password=c["password"],
-        sslmode="require"
-    )
-    return ConnWrapper(raw)
+def get_db_connection(TrSwpsDb):             
+    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    # Retrieve credentials from streamlit secrets
+    creds = st.secrets["TrSwps_db"]
+    # 2. Establish connection to database for this app in Aiven instance
+    return pg8000.native.Connection(
+        host = creds["host"],  
+        database = creds["database"],  
+        user = creds["user"], 
+        password = creds["password"], 
+        port = creds["port"], 
+        ssl_context = True   # Important for Aiven # must be activated to to connect to Aiven PostgreSQL
+    )    
     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 try:
     cnnOne = get_db_connection("TrSwpsDb")
@@ -245,9 +220,9 @@ districts=[
 #  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 # 1 Page Cocfiguration & Setup
-st.set_page_config(page_title="Mutual Transfer & Cross Swap Portal for Civil Service Teachers in Zimbabwe", layout="wide")
+st.set_page_config(page_title="School Allocation App", layout="wide")
 
-# 2 Sidebar Navigation
+# 2 Sidebar Navigation"PURE MATHEMATICS",
 st.sidebar.title("Navigation Menu")
 page = st.sidebar.radio(
     "Go to:",
@@ -256,10 +231,9 @@ page = st.sidebar.radio(
 
 # 3 Page Functions
 def show_welcome():
-    st.title("Teacher Cross Transfers & Mutual Swaps")
-    st.subheader("Connect with fellow public school teachers in Zimbabwe to arrange official mutual swaps.")
-    st.markdown("""
-             Welcome to the matching platform for civil service teachers under the **Ministry of Primary and Secondary Education (MoPSE)** seeking **Mutual Cross Transfers**. This application helps you locate another teacher for an official swap before submitting your **Intra-District, Intra-Provincial, or Inter-Provincial transfer forms** to the Public Service Commission. Please use the **Navigation Menu** on the left to access the respective swop pages
+    st.title("Welcome to the ZIM EDUCATORS SWOPS Portal")
+    st.write("""
+             This application is designed to facilitate the search for swop matches for class teachers, school heads, and deputy school heads in all schools throughout Zimbabwe. Please use the **Navigation Menu** on the left to access the respective swop pages
              """)
 
 cnnOne = get_db_connection("TrSwps_db")
