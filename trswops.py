@@ -1,5 +1,5 @@
 import streamlit as st
-import pg8000.native
+import psycopg2
 from pg8000.exceptions import InterfaceError, DatabaseError
 from datetime import datetime, date
 import pandas as pd
@@ -13,21 +13,31 @@ formatted_curdate = current_date.strftime("%d/%m/%Y  %H:%M:%S")
 
 # __CONNECTION START__
 
-# Define the cached resourc function
+class ConnWrapper:
+    def __init__(self, conn):
+        self.conn = conn
+    
+    def run(self, sql, params=None):
+        with self.conn.cursor() as cur:
+            cur.execute(sql, params or ())
+            try:
+                return cur.fetchall()
+            except:
+                self.conn.commit()
+                return []
+
 @st.cache_resource
-def get_db_connection(TrSwpsDb):             
-    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # Retrieve credentials from streamlit secrets
-    creds = st.secrets["TrSwps_db"]
-    # 2. Establish connection to database for this app in Aiven instance
-    return pg8000.native.Connection(
-        host = creds["host"],  
-        database = creds["database"],  
-        user = creds["user"], 
-        password = creds["password"], 
-        port = creds["port"], 
-        ssl_context = True   # Important for Aiven # must be activated to to connect to Aiven PostgreSQL
-    )    
+def get_db_connection(_db_name=None):
+    c = st.secrets["TrSwps_db"]
+    raw = psycopg2.connect(
+        host=c["host"],
+        port=c["port"],
+        dbname=c["database"],
+        user=c["user"],
+        password=c["password"],
+        sslmode="require"
+    )
+    return ConnWrapper(raw)   
     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 try:
     cnnOne = get_db_connection("TrSwpsDb")
