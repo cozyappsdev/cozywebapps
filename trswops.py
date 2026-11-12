@@ -345,7 +345,7 @@ def show_class_teacher_swops():
 
         if st.button("Find My Swop Matches"):
             query = "SELECT * FROM TrPosts WHERE SchLevel = %s and SubjTaught = %s and LvlTaughtTo = %s and CurDist = %s and DesiredDist= %s"        
-            matching_posts = cnnOne.run(query, (SchLevel, SubjTaught, LvlTaughtTo, CurDistrict, DesiredDistrict))         
+            matching_posts = cnnOne.run(query, (SchLevel, SubjTaught, LvlTaughtTo, DesiredDistrict, CurDistrict))         
         
             if matching_posts:         
 
