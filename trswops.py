@@ -310,7 +310,7 @@ def show_class_teacher_swops():
                 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                 @st.cache_data(ttl=600)
                 def count_EUId():
-                    result = cnnOne.run("SELECT COUNT(*) FROM TrPosts WHERE EnryUId = :euid", euid=EUId)
+                    result = cnnOne.run("SELECT COUNT(*) FROM TrPosts WHERE EnryUId = %s", (EUId,))
                     return result[0][0]
                 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                 
@@ -323,8 +323,8 @@ def show_class_teacher_swops():
                             st.error("Enter data in all the data fields.")
                         else:                       
                             if cnnOne:                        
-                                cnnOne.run("INSERT INTO TrPosts (RecDte, Unme, BusContNo, SchLevel, SubjTaught, LvlTaughtTo, CurDist, DesiredDist, EnryUId) VALUES (:rdte, :unm, :bcontno, :sklvl, :sbjtaught, :lvltotto, :curdstrict, :dstrictsot, :entuid)",
-                                    rdte=RecDate, unm=UName, bcontno=BusContactNo, sklvl=SchoolLevel, sbjtaught=SubjectTaught, lvltotto=LevelTaughtTo, curdstrict=CurrentDistrict, dstrictsot=DesiredDistrict, entuid=EUId)                                       
+                                cnnOne.run("INSERT INTO TrPosts (RecDte, Unme, BusContNo, SchLevel, SubjTaught, LvlTaughtTo, CurDist, DesiredDist, EnryUId) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                                    (RecDate, UName, BusContactNo, SchoolLevel, SubjectTaught, LevelTaughtTo, CurrentDistrict, DesiredDistrict, EUId))                                      
                                 #cnnOne.commit()
                                 st.cache_data.clear() # Reset cache to show updated data                        
                                 st.toast("Record successfully inserted.")           
@@ -344,8 +344,8 @@ def show_class_teacher_swops():
         kcd=''
 
         if st.button("Find My Swop Matches"):
-            query = "SELECT * FROM TrPosts WHERE SchLevel = :ksl and SubjTaught = :kst and LvlTaughtTo = :kltt and CurDist = :kdd and DesiredDist= :kcd"        
-            matching_posts = cnnOne.run(query, ksl=SchLevel, kst=SubjTaught, kltt=LvlTaughtTo, kcd=CurDistrict, kdd=DesiredDistrict)          
+            query = "SELECT * FROM TrPosts WHERE SchLevel = %s and SubjTaught = %s and LvlTaughtTo = %s and CurDist = %s and DesiredDist= %s"        
+            matching_posts = cnnOne.run(query, (SchLevel, SubjTaught, LvlTaughtTo, CurDistrict, DesiredDistrict))         
         
             if matching_posts:         
 
@@ -433,7 +433,8 @@ def show_class_teacher_swops():
             # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             @st.cache_data(ttl=600)
             def count_EUId():
-                result = cnnOne.run("SELECT COUNT(*) FROM TrPosts WHERE EnryUId = :euid", euid=EUId)
+                # result = cnnOne.run("SELECT COUNT(*) FROM TrPosts WHERE EnryUId = :euid", euid=EUId)
+                result = cnnOne.run("SELECT COUNT(*) FROM TrPosts WHERE EnryUId = %s", (EUId,))
                 return result[0][0]
             # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>                             
             if st.button("Delete Entry"):                
@@ -445,7 +446,7 @@ def show_class_teacher_swops():
                         st.toast(f"Unique Identifier {EUId} not found.")
                     else:
                         if cnnOne:                        
-                            cnnOne.run("DELETE FROM TrPosts WHERE EnryUId = :pri", pri=EUId)
+                            cnnOne.run("DELETE FROM TrPosts WHERE EnryUId = %s", (EUId,))
                             # cnnOne.commit()                                               
                             st.cache_data.clear() # Reset cache to show updated data
                             st.toast(f"Post with Unique Identifier {EUId} successfully deleted!")
@@ -516,7 +517,7 @@ def show_school_heads_swops():
                 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                 @st.cache_data(ttl=600)
                 def count_EUId():
-                    result = cnnOne.run("SELECT COUNT(*) FROM HMSwops WHERE EnryUId = :euid", euid=EUId)
+                    result = cnnOne.run("SELECT COUNT(*) FROM HMSwops WHERE EnryUId = %s", (EUId,))
                     return result[0][0]
                 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                 
@@ -529,8 +530,8 @@ def show_school_heads_swops():
                             st.error("Enter data in all the data fields.")
                         else:                       
                             if cnnOne:                        
-                                cnnOne.run("INSERT INTO HMSwops (RecDte, Unme, BusContNo, SchLevel, PositionHeld, CurDist, DesiredDist, EnryUId) VALUES (:recdte, :unme, :buscontno, :schlevel, :positionheld, :curdist, :desireddist, :enryuid)",
-                                    recdte=RecDate, unme=UName, buscontno=BusContactNo, schlevel=SchoolLevel, positionheld=PositionHeld, curdist=CurrentDistrict, desireddist=DesiredDistrict, enryuid=EUId)                                       
+                                cnnOne.run("INSERT INTO HMSwops (RecDte, Unme, BusContNo, SchLevel, PositionHeld, CurDist, DesiredDist, EnryUId) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                                    (RecDate, UName, BusContactNo, SchoolLevel, PositionHeld, CurrentDistrict, DesiredDistrict, EUId))                                       
                                 #cnnOne.commit()
                                 st.cache_data.clear() # Reset cache to show updated data                        
                                 st.toast("Record successfully inserted.")                               
@@ -544,8 +545,8 @@ def show_school_heads_swops():
         membersDesiredDist = st.selectbox("Select DISTRICT where you wish to go", options=districts) 
        
         if st.button("Find My Swop Matches"):
-            query = "SELECT * FROM HMSwops WHERE SchLevel = :ksl and PositionHeld = :kph and CurDist = :kcd and DesiredDist= :kdd"                   
-            matching_posts = cnnOne.run(query, ksl = membersSchLvl, kph = membersPH, kcd=membersDesiredDist, kdd=membersCurDist)          
+            query = "SELECT * FROM HMSwops WHERE SchLevel = :ksl and PositionHeld = %s and CurDist = %s and DesiredDist= %s"                   
+            matching_posts = cnnOne.run(query, (membersSchLvl, membersPH, membersDesiredDist, membersCurDist))          
            
             if matching_posts:         
 
@@ -608,7 +609,7 @@ def show_school_heads_swops():
                         'Position_Held': one_post[5],                        
                         'Current_District': one_post[6],                               
                         'District_Desired': one_post[7],
-                        # 'Post_RefId': one_post[9]                    
+                        # 'Post_RefId': one_post[8]                    
                         })
                 st.write("")
                 st.write(f"LIST OF ALL THE POSTS")
@@ -631,7 +632,10 @@ def show_school_heads_swops():
             # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             @st.cache_data(ttl=600)
             def count_EUId():
-                result = cnnOne.run("SELECT COUNT(*) FROM HMSwops WHERE EnryUId = :euid", euid=EUId)
+
+                result = cnnOne.run("SELECT COUNT(*) FROM TrPosts WHERE EnryUId = %s", (EUId,))
+
+                # result = cnnOne.run("SELECT COUNT(*) FROM HMSwops WHERE EnryUId = :euid", euid=EUId)
                 return result[0][0]
             # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>                             
             if st.button("Delete Entry"):                
@@ -643,7 +647,7 @@ def show_school_heads_swops():
                         st.toast(f"Unique Identifier {EUId} not found.")
                     else:
                         if cnnOne:                        
-                            cnnOne.run("DELETE FROM HMSwops WHERE EnryUId = :pri", pri=EUId)
+                            cnnOne.run("DELETE FROM HMSwops WHERE EnryUId = %s", (EUId,))
                             # cnnOne.commit()                                               
                             st.cache_data.clear() # Reset cache to show updated data
                             st.toast(f"Post with Unique Identifier {EUId} successfully deleted!")
